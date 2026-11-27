@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardian: read the love, skip the hate</title>
+<meta name="description" content="Free, open-source comment shield for creators. Hides bullying on YouTube, Instagram and X around the clock. Try it in your browser.">
+<meta property="og:title" content="Guardian: read the love, skip the hate">
+<meta property="og:description" content="Free, open-source comment shield that hides bullying on YouTube, Instagram and X around the clock.">
+<meta property="og:image" content="images/always-on.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+  /* One column: pitch + playground first, then demo, install and features. */
+  :root {
+    --bg: #f6f5fb; --surface: #fff; --fg: #1e1b2e; --muted: #625e78; --line: #e4e2ee;
+    --accent: #6d4aff; --accent-soft: #eee9ff; --on-accent: #fff;
+    --good: #18864b; --good-soft: #e3f6ec; --warn: #a15c00; --warn-soft: #fff2dc; --bad: #b4233a; --bad-soft: #fde7eb;
+    --display: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --bg: #13111c; --surface: #1d1a29; --fg: #ece9f6; --muted: #a29eb8; --line: #322e44;
+    --accent: #9b85ff; --accent-soft: #2b2448; --on-accent: #13111c;
+    --good: #4cd38a; --good-soft: #163626; --warn: #f2b45a; --warn-soft: #3a2b12; --bad: #ff7a8e; --bad-soft: #3d1820; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left, 0px)); }
+  header { padding-block: 48px 8px; display: grid; gap: 10px; }
+  .brand { display: flex; gap: 10px; align-items: center; font: 700 20px var(--display); }
+  h1 { font: 700 clamp(34px, 6vw, 56px)/1.05 var(--display); margin: 8px 0 0; text-wrap: balance; letter-spacing: -.01em; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 60ch; margin: 0; }
+  .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 10px; padding: 11px 18px; font: 600 15px var(--body); cursor: pointer; text-decoration: none; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); }
+  .btn.ghost { background: var(--accent-soft); color: var(--accent); }
+  .btn:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  section { margin-top: 36px; }
+  h2 { font: 600 24px/1.25 var(--display); margin: 0 0 12px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .play { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 760px) { .play { grid-template-columns: 1fr; } }
+  textarea { width: 100%; min-height: 260px; resize: vertical; font: 14px/1.5 var(--mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--bg); border-radius: 10px; padding: 10px; }
+  .stat b { display: block; font: 700 22px var(--display); font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tab { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 999px; padding: 5px 12px; font: 500 14px var(--body); cursor: pointer; }
+  .tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .list { max-height: 300px; overflow-y: auto; }
+  .c { border-top: 1px solid var(--line); padding: 9px 0; font-size: 15px; overflow-wrap: anywhere; }
+  .c:first-child { border-top: 0; }
+  .meta { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tag { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+  .t-supportive { background: var(--good-soft); color: var(--good); }
+  .t-neutral { background: var(--accent-soft); color: var(--accent); }
+  .t-criticism { background: var(--warn-soft); color: var(--warn); }
+  .t-harassment, .t-threat { background: var(--bad-soft); color: var(--bad); }
+  .blur { filter: blur(6px); cursor: pointer; user-select: none; }
+  video, .shot { width: 100%; max-width: 100%; border-radius: 14px; display: block; border: 1px solid var(--line); }
+  video { aspect-ratio: 16 / 9; background: #000; }
+  pre { margin: 0; background: #1d1a29; color: #ece9f6; border-radius: 10px; padding: 14px; overflow-x: auto; font: 14px/1.6 var(--mono); }
+  pre .cm { color: #a29eb8; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .feat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+  .feat h3 { margin: 0 0 4px; font: 600 17px var(--display); }
+  .feat p { margin: 0; color: var(--muted); font-size: 15px; }
+  footer { margin: 48px 0 40px; color: var(--muted); font-size: 14px; display: grid; gap: 6px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">🛡️ Guardian</div>
+    <h1>Read the love. Skip the hate.</h1>
+    <p class="lede">A free, open-source comment shield for creators. It hides bullying on YouTube, Instagram and X around the clock, blurs it on TikTok, and puts your kind comments first.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/swetha-8219/Guardian">⭐ Star on GitHub</a>
+      <a class="btn ghost" href="#install">Install in one command</a>
+    </div>
+  </header>
+
+  <section aria-labelledby="try">
+    <h2 id="try">Try it right here</h2>
+    <div class="play">
+      <div class="card">
+        <label for="input" class="hint" style="margin:0 0 8px;display:block">Paste comments, one per line (<code>username: comment</code> works too):</label>
+        <textarea id="input" spellcheck="false"></textarea>
+        <div class="cta">
+          <button class="btn primary" id="go" type="button">🛡️ Shield these comments</button>
+          <button class="btn ghost" id="clear" type="button">Clear</button>
+        </div>
+        <p class="hint">Runs entirely in your browser with Guardian's built-in word filter. Nothing is uploaded. The full app can use Claude, which also understands sarcasm.</p>
+      </div>
+      <div class="card" aria-live="polite">
+        <div class="stats" id="stats"></div>
+        <div class="tabs" id="tabs"></div>
+        <div class="list" id="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="demo">
+    <h2 id="demo">Watch the demo (55 sec)</h2>
+    <video src="guardian-demo.mp4" poster="images/always-on.png" controls playsinline preload="none"></video>
+    <p class="hint">Demo with example comments.</p>
+  </section>
+
+  <section aria-labelledby="install" id="install">
+    <h2>Install in one command</h2>
+    <pre><span class="cm"># with uv (nothing else to install first)</span>
+uvx --from git+https://github.com/swetha-8219/Guardian guardian
+
+<span class="cm"># or with pip</span>
+pip install git+https://github.com/swetha-8219/Guardian
+guardian</pre>
+    <p class="hint">Guardian opens in your browser at <code>localhost:5000</code>. No keys needed to try it. Connect YouTube, Instagram or X when you want always-on protection.</p>
+  </section>
+
+  <section aria-labelledby="what">
+    <h2 id="what">What Guardian does</h2>
+    <div class="grid3">
+      <div class="feat"><h3>⏱️ Always-on protection</h3><p>Checks YouTube every 2 min, X every 3, Instagram every 5, and hides bullying on the platform itself. One click to unhide a mistake.</p></div>
+      <div class="feat"><h3>💚 Kind comments first</h3><p>A highlights feed of supportive comments. Honest feedback stays visible, because criticism isn't bullying.</p></div>
+      <div class="feat"><h3>🧩 Browser extension</h3><p>Blurs hurtful comments as you scroll YouTube, Instagram, TikTok and X.</p></div>
+      <div class="feat"><h3>🚨 Threat alerts &amp; evidence</h3><p>Flags threats and repeat offenders, and exports a CSV so you can report without rereading.</p></div>
+      <div class="feat"><h3>💌 Weekly kindness email</h3><p>A summary of the good parts of your week. The hate is never in it.</p></div>
+      <div class="feat"><h3>🤖 Works with Claude (MCP)</h3><p>Ask Claude "how did people react to my latest video?" and get the love and the feedback, not the abuse.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="shots">
+    <h2 id="shots">Screenshots</h2>
+    <div class="grid3">
+      <img class="shot" src="images/always-on.png" alt="Always-on protection panel watching YouTube, Instagram and X, with hidden comments blurred and an Unhide link on each" loading="lazy">
+      <img class="shot" src="images/extension.png" alt="The browser extension blurring hurtful comments on a comments page" loading="lazy">
+      <img class="shot" src="images/email.png" alt="A sample weekly kindness email" loading="lazy">
+    </div>
+  </section>
+
+  <footer>
+    <span>Guardian is MIT-licensed and free forever. If it helps you or a creator you love, <a href="https://github.com/swetha-8219/Guardian">give it a ⭐ on GitHub</a>, it helps others find it.</span>
+    <span>What strangers type says more about them than about you. 💚</span>
+  </footer>
+</div>
+
+<script src="wordlists.js"></script>
+<script src="filter.js"></script>
+<script>
+  const SAMPLE = `fan_amy: This video made my whole week, thank you!! ❤️
+techguy: The audio was a bit quiet in the second half, maybe boost it next time
+troll99: ur so ugly lol nobody wants to see ur face
+mia.k: What camera do you use?
+anon_hater: kys nobody would miss you
+jordan: I disagree with your point about budgeting
+troll99: honestly just quit, you're pathetic
+sunshine: You inspired me to start my own channel 🔥
+lee: first!
+troll99: still ugly`;
+  const LABELS = { supportive: "Supportive", neutral: "Neutral", criticism: "Feedback", harassment: "Harassment", threat: "Urgent" };
+  const HIDE = GuardianFilter.HIDE;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  let rows = [], tab = "love";
+
+  function parse(text) {
+    return text.split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
+      const m = line.match(/^@?([\w.]{2,30}):\s+(.+)$/);
+      const author = m ? m[1] : "anonymous", body = m ? m[2] : line;
+      return { author, text: body, category: GuardianFilter.classify(body) };
+    });
+  }
+  function render() {
+    const n = (f) => rows.filter(f).length;
+    const hidden = n((r) => HIDE.has(r.category));
+    $("stats").innerHTML = [
+      [rows.length, "comments"], [rows.length ? Math.round(100 * (rows.length - hidden) / rows.length) + "%" : "–", "OK to read"], [hidden, "hidden for you 🛡️"],
+    ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+    const tabs = [["love", "💚 Kind", (r) => r.category === "supportive"], ["feedback", "💡 Feedback", (r) => r.category === "criticism"],
+                  ["all", "All safe", (r) => !HIDE.has(r.category)], ["hidden", "🙈 Hidden", (r) => HIDE.has(r.category)]];
+    $("tabs").innerHTML = tabs.map(([k, l, f]) => `<button type="button" class="tab" aria-pressed="${k === tab}" data-k="${k}">${l} (${n(f)})</button>`).join("");
+    const shown = rows.filter(tabs.find((t) => t[0] === tab)[2]);
+    $("list").innerHTML = shown.length ? shown.map((r) => `<div class="c"><div class="meta"><span class="tag t-${r.category}">${LABELS[r.category]}</span><span>${esc(r.author)}</span></div>
+      <div class="${HIDE.has(r.category) ? "blur" : ""}" title="${HIDE.has(r.category) ? "Click to reveal (only if you're ready)" : ""}">${esc(r.text)}</div></div>`).join("")
+      : `<p class="hint">Nothing here${tab === "hidden" ? ". No bullying found 🎉" : ""}.</p>`;
+  }
+  $("tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (b) { tab = b.dataset.k; render(); } });
+  $("list").addEventListener("click", (e) => e.target.classList.remove("blur"));
+  $("go").onclick = () => { rows = parse($("input").value); tab = "love"; render(); };
+  $("clear").onclick = () => { $("input").value = ""; rows = []; render(); $("input").focus(); };
+  $("input").value = SAMPLE; rows = parse(SAMPLE); render();
+</script>
+</body>
+</html>

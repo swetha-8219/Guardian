@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Guardian",
+  "version": "1.0.0",
+  "description": "Blurs bullying comments on YouTube, Instagram, TikTok and X so creators can read the love and skip the hate.",
+  "permissions": ["storage"],
+  "host_permissions": ["http://localhost:5000/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "Guardian" },
+  "content_scripts": [{
+    "matches": [
+      "https://www.youtube.com/*",
+      "https://www.instagram.com/*",
+      "https://www.tiktok.com/*",
+      "https://x.com/*",
+      "https://twitter.com/*"
+    ],
+    "js": ["wordlists.js", "filter.js", "content.js"],
+    "css": ["content.css"],
+    "run_at": "document_idle"
+  }]
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --bg: #fff; --text: #1e1b2e; --muted: #6b6880; --accent: #6d4aff; --soft: #f6f5fb; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1d1a29; --text: #ece9f6; --muted: #a29eb8; --accent: #9b85ff; --soft: #13111c; } }
+  body { margin: 0; width: 290px; padding: 16px; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; color: var(--muted); }
+  label { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; cursor: pointer; }
+  input { margin-top: 3px; accent-color: var(--accent); }
+  small { color: var(--muted); display: block; }
+  .stat { background: var(--soft); border-radius: 10px; padding: 10px 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <h1>🛡️ Guardian</h1>
+  <p>Read the love, skip the hate.</p>
+  <label><input type="checkbox" id="enabled"> <span>Blur bullying comments</span></label>
+  <label><input type="checkbox" id="useApp"> <span>Smarter AI sorting<small>Needs the Guardian app running on this computer with an Anthropic key.</small></span></label>
+  <div class="stat" id="stat">Open a post on YouTube, Instagram, TikTok or X.</div>
+  <script src="popup.js"></script>
+</body>
+</html>

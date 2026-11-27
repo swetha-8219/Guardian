@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardian</title>
+<style>
+  :root {
+    --bg: #f6f5fb; --card: #ffffff; --text: #1e1b2e; --muted: #6b6880;
+    --line: #e4e2ee; --accent: #6d4aff; --accent-soft: #eee9ff;
+    --good: #18864b; --good-soft: #e3f6ec; --warn: #a15c00; --warn-soft: #fff2dc;
+    --bad: #b4233a; --bad-soft: #fde7eb; --info: #3b5bdb; --info-soft: #e7ecff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #13111c; --card: #1d1a29; --text: #ece9f6; --muted: #a29eb8;
+      --line: #322e44; --accent: #9b85ff; --accent-soft: #2b2448;
+      --good: #4cd38a; --good-soft: #163626; --warn: #f2b45a; --warn-soft: #3a2b12;
+      --bad: #ff7a8e; --bad-soft: #3d1820; --info: #8ea6ff; --info-soft: #1e2647;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { margin: 0; font-size: 28px; }
+  .sub { color: var(--muted); margin: 4px 0 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .pill { border: 1px solid var(--line); background: transparent; color: var(--text);
+          padding: 7px 14px; border-radius: 999px; cursor: pointer; font: inherit; }
+  .pill.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 6px; background: var(--muted); opacity: .4; }
+  .dot.live { background: var(--good); opacity: 1; }
+  textarea, input[type=text] { width: 100%; font: inherit; color: var(--text); background: var(--bg);
+          border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  textarea { min-height: 140px; resize: vertical; }
+  .btn { background: var(--accent); color: #fff; border: 0; padding: 10px 18px; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer; }
+  .btn.ghost { background: var(--accent-soft); color: var(--accent); }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .error { color: var(--bad); background: var(--bad-soft); border-radius: 10px; padding: 10px 12px; margin-top: 12px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { background: var(--bg); border-radius: 10px; padding: 12px; }
+  .stat b { display: block; font-size: 24px; }
+  .stat span { color: var(--muted); font-size: 14px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .comment { border-top: 1px solid var(--line); padding: 12px 0; }
+  .comment:first-child { border-top: 0; }
+  .meta { font-size: 13px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .t-supportive { background: var(--good-soft); color: var(--good); }
+  .t-neutral { background: var(--info-soft); color: var(--info); }
+  .t-criticism { background: var(--warn-soft); color: var(--warn); }
+  .t-harassment, .t-threat { background: var(--bad-soft); color: var(--bad); }
+  .text { margin: 4px 0 0; overflow-wrap: anywhere; }
+  .blur { filter: blur(6px); user-select: none; cursor: pointer; }
+  .reveal { font-size: 13px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; }
+  .banner { background: var(--bad-soft); color: var(--bad); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .care { background: var(--good-soft); color: var(--good); border-radius: 10px; padding: 12px; }
+  .hidebar { background: var(--accent-soft); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .linkbtn { background: none; border: 0; color: var(--accent); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
+  .gtitle { margin: 0; font-size: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .pill-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
+  .pill-status.off { background: var(--warn-soft); color: var(--warn); }
+  .gplatforms { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0; }
+  .gp { background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 14px; min-width: 0; }
+  .gp b { display: block; font-size: 15px; }
+  .gp .st { font-weight: 600; }
+  .st.watching { color: var(--good); } .st.error { color: var(--bad); } .st.not_connected, .st.unsupported { color: var(--muted); }
+  .gp .msg { color: var(--muted); overflow-wrap: anywhere; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🛡️ Guardian</h1>
+  <p class="sub">Read the love, skip the hate. Mean comments are hidden before you see them.</p>
+
+  <section class="card" id="alwaysOn">
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <h2 class="gtitle">Always-on protection <span class="pill-status" id="gState">…</span></h2>
+        <p class="hint" style="margin:2px 0 0" id="gSummary">Hides bullying on your accounts around the clock, so you don't have to click anything.</p>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="gCheck">Check now</button>
+        <button class="btn ghost" id="gPause">Pause</button>
+      </div>
+    </div>
+    <div class="gplatforms" id="gPlatforms"></div>
+    <details id="gLogBox">
+      <summary id="gLogTitle">Hidden automatically</summary>
+      <p class="hint">Wrongly hidden? Click <b>Unhide</b> and it reappears on the platform.</p>
+      <div id="gLog"></div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="row" id="platforms"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="pill on" data-mode="paste">Paste comments</button>
+      <button class="pill" data-mode="fetch" id="fetchBtn">Fetch from post link</button>
+    </div>
+
+    <div id="pasteBox" style="margin-top:12px">
+      <textarea id="pasteText" placeholder="Paste comments here, one per line (or 'username: comment'). A CSV export with a 'text' or 'comment' column works too."></textarea>
+      <div class="row" style="margin-top:8px">
+        <label class="btn ghost" style="font-weight:500">Upload CSV / TXT<input type="file" id="file" accept=".csv,.txt" class="hidden"></label>
+        <button class="btn ghost" id="sample" style="font-weight:500">Try sample comments</button>
+      </div>
+    </div>
+    <div id="fetchBox" class="hidden" style="margin-top:12px">
+      <input type="text" id="link" placeholder="">
+      <p class="hint" id="fetchHint"></p>
+    </div>
+
+    <div class="row" style="margin-top:14px; justify-content:space-between">
+      <button class="btn" id="go">Shield my comments</button>
+      <span class="hint" id="engine"></span>
+    </div>
+    <div id="err" class="error hidden"></div>
+  </section>
+
+  <section id="results" class="hidden">
+    <div class="card">
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="card">
+      <div id="urgent"></div>
+      <div class="tabs" id="tabs"></div>
+      <div id="hideBar" class="hidebar hidden"></div>
+      <div id="list"></div>
+      <div class="row" style="margin-top:12px; justify-content:space-between">
+        <span class="hint">Hidden comments are saved as evidence so you can report them without rereading.</span>
+        <button class="btn ghost" id="export">Download evidence (CSV)</button>
+      </div>
+    </div>
+    <div class="care">💚 What strangers type says more about them than about you. If comments are weighing on you, take a break and talk to someone you trust.</div>
+  </section>
+</main>
+
+<script>
+const PLATFORMS = {
+  youtube:   { label: "YouTube",   fetch: true,  ph: "https://www.youtube.com/watch?v=...", hint: "Needs YOUTUBE_API_KEY in .env (free from Google Cloud)." },
+  instagram: { label: "Instagram", fetch: true,  ph: "Numeric media ID, e.g. 17895695668004550", hint: "Needs INSTAGRAM_ACCESS_TOKEN (Business or Creator account). See README to find the media ID." },
+  tiktok:    { label: "TikTok",    fetch: false, ph: "", hint: "" },
+  x:         { label: "X",         fetch: true,  ph: "https://x.com/you/status/123...", hint: "Needs X_BEARER_TOKEN (X API Basic tier or higher)." },
+};
+const LABELS = { supportive: "Supportive", neutral: "Neutral", criticism: "Feedback", harassment: "Harassment", threat: "Urgent" };
+const SAMPLE = `fan_amy: This video made my whole week, thank you!! ❤️
+techguy: The audio was a bit quiet in the second half, maybe boost it next time
+troll99: ur so ugly lol nobody wants to see ur face
+mia.k: What camera do you use?
+anon_hater: kys nobody would miss you
+jordan: I disagree with your point about budgeting, renting isn't always worse
+troll99: honestly just quit, you're pathetic
+sunshine: You inspired me to start my own channel 🔥
+lee: first!
+troll99: still ugly`;
+
+let state = { platform: "youtube", mode: "paste", data: null, tab: "highlights", connected: {}, canHide: {} };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function renderPlatforms() {
+  $("platforms").innerHTML = Object.entries(PLATFORMS).map(([k, p]) =>
+    `<button class="pill ${k === state.platform ? "on" : ""}" data-p="${k}">${p.label}<span class="dot ${state.connected[k] ? "live" : ""}" title="${state.connected[k] ? "Connected" : "Paste mode"}"></span></button>`).join("");
+  const p = PLATFORMS[state.platform];
+  $("fetchBtn").classList.toggle("hidden", !p.fetch);
+  if (!p.fetch && state.mode === "fetch") setMode("paste");
+  $("link").placeholder = p.ph;
+  $("fetchHint").textContent = p.hint;
+}
+function setMode(m) {
+  state.mode = m;
+  document.querySelectorAll("[data-mode]").forEach((b) => b.classList.toggle("on", b.dataset.mode === m));
+  $("pasteBox").classList.toggle("hidden", m !== "paste");
+  $("fetchBox").classList.toggle("hidden", m !== "fetch");
+}
+
+$("platforms").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { state.platform = b.dataset.p; renderPlatforms(); } };
+document.querySelectorAll("[data-mode]").forEach((b) => (b.onclick = () => setMode(b.dataset.mode)));
+$("sample").onclick = () => { $("pasteText").value = SAMPLE; };
+$("file").onchange = async (e) => { const f = e.target.files[0]; if (f) $("pasteText").value = await f.text(); };
+
+$("go").onclick = async () => {
+  $("err").classList.add("hidden");
+  $("go").disabled = true; $("go").textContent = "Checking comments…";
+  try {
+    const res = await fetch("/api/analyze", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ platform: state.platform, mode: state.mode, text: $("pasteText").value, link: $("link").value }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Something went wrong");
+    state.data = data; state.tab = "highlights";
+    $("engine").textContent = `Sorted by ${data.engine}`;
+    renderResults();
+  } catch (e) {
+    $("err").textContent = e.message; $("err").classList.remove("hidden");
+  } finally {
+    $("go").disabled = false; $("go").textContent = "Shield my comments";
+  }
+};
+
+function renderResults() {
+  const { summary: s, comments } = state.data;
+  $("results").classList.remove("hidden");
+  $("stats").innerHTML = [
+    [s.total, "comments checked"],
+    [s.percent_ok + "%", "were OK to read"],
+    [s.counts.supportive, "supportive 💚"],
+    [s.hidden, "hidden for you 🛡️"],
+  ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+
+  const urgent = s.counts.threat;
+  $("urgent").innerHTML = urgent
+    ? `<div class="banner">🚨 ${urgent} comment${urgent > 1 ? "s" : ""} may contain threats or self-harm encouragement. Consider reporting ${urgent > 1 ? "them" : "it"} to the platform. You can review them under "Hidden" when you feel ready, or ask a friend to.</div>` : "";
+  if (s.repeat_offenders.length) {
+    $("urgent").innerHTML += `<div class="banner" style="background:var(--warn-soft);color:var(--warn)">Repeat offenders: ${s.repeat_offenders.map((o) => `<b>${esc(o.author)}</b> (${o.count})`).join(", ")}. Blocking them could help.</div>`;
+  }
+
+  const tabs = [
+    ["highlights", `Highlights (${s.counts.supportive})`],
+    ["visible", `All safe (${s.total - s.hidden})`],
+    ["feedback", `Feedback (${s.counts.criticism})`],
+    ["hidden", `Hidden (${s.hidden})`],
+  ];
+  $("tabs").innerHTML = tabs.map(([k, l]) => `<button class="pill ${k === state.tab ? "on" : ""}" data-tab="${k}">${l}</button>`).join("");
+  $("tabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (b) { state.tab = b.dataset.tab; renderResults(); } };
+
+  renderHideBar();
+
+  const filters = {
+    highlights: (c) => c.category === "supportive",
+    visible: (c) => !c.hidden,
+    feedback: (c) => c.category === "criticism",
+    hidden: (c) => c.hidden,
+  };
+  const shown = comments.filter(filters[state.tab]);
+  $("list").innerHTML = shown.length ? shown.map((c, i) => `
+    <div class="comment">
+      <div class="meta"><span class="tag t-${c.category}">${LABELS[c.category]}</span><span>${esc(c.author)}</span>${c.reason ? `<span>· ${esc(c.reason)}</span>` : ""}</div>
+      ${c.hidden
+        ? `<p class="text blur" data-i="${i}">${esc(c.text)}</p><button class="reveal" data-i="${i}">Reveal (only if you're ready)</button>`
+        : `<p class="text">${esc(c.text)}</p>`}
+    </div>`).join("") : `<p class="hint">Nothing here${state.tab === "hidden" ? " - no bullying found 🎉" : ""}.</p>`;
+  $("list").querySelectorAll(".reveal").forEach((b) => (b.onclick = () => {
+    $("list").querySelector(`p[data-i="${b.dataset.i}"]`).classList.remove("blur"); b.remove();
+  }));
+}
+
+const NAMES = { youtube: "YouTube", instagram: "Instagram", x: "X" };
+function renderHideBar() {
+  const d = state.data, bar = $("hideBar");
+  const bad = d.comments.filter((c) => c.hidden);
+  const show = state.tab === "hidden" && bad.length && d.mode === "fetch" && state.canHide[d.platform];
+  bar.classList.toggle("hidden", !show);
+  if (!show) return;
+  const how = { youtube: "held for review (fans won't see them; you can approve them later in YouTube Studio)", instagram: "hidden (you can unhide them in the Instagram app)", x: "moved to hidden replies (you can unhide them on X)" }[d.platform];
+  bar.innerHTML = `<span>Hide these ${bad.length} on ${NAMES[d.platform]} too? They'll be ${how}. Nothing is deleted.</span><button class="btn" id="hideNow">Hide on ${NAMES[d.platform]}</button>`;
+  $("hideNow").onclick = async () => {
+    $("hideNow").disabled = true; $("hideNow").textContent = "Hiding…";
+    try {
+      const res = await fetch("/api/hide", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform: d.platform, ids: bad.map((c) => c.id) }) });
+      const out = await res.json();
+      if (!res.ok) throw new Error(out.error);
+      bar.innerHTML = `<span>✅ ${out.hidden} comment${out.hidden === 1 ? "" : "s"} hidden on ${NAMES[d.platform]}.</span>`;
+    } catch (e) {
+      bar.innerHTML = `<span style="color:var(--bad)">${esc(e.message)}</span>`;
+    }
+  };
+}
+
+// ---------------------------------------------------------------- Always-on protection panel
+const G_NAMES = { youtube: "YouTube", instagram: "Instagram", x: "X", tiktok: "TikTok" };
+let statusInfo = {};
+const ago = (iso) => {
+  if (!iso) return "not yet";
+  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  return s < 60 ? "just now" : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
+};
+const every = (sec) => sec >= 60 ? `every ${Math.round(sec / 60)} min` : `every ${sec}s`;
+
+function connectHtml(p) {
+  if (p === "youtube" && statusInfo.youtube_login_available) return `<a href="/auth/youtube/login" style="color:var(--accent)">Connect YouTube</a>`;
+  if (p === "x" && statusInfo.x_login_available) return `<a href="/auth/x/login" style="color:var(--accent)">Connect X</a>`;
+  if (p === "instagram") return "Add INSTAGRAM_ACCESS_TOKEN to .env";
+  return `Add ${p === "x" ? "X_CLIENT_ID" : "YOUTUBE_CLIENT_ID"} to .env (see README)`;
+}
+
+function renderAlwaysOn(g) {
+  const watching = Object.values(g.platforms).filter((i) => i.status === "watching").length;
+  $("gState").textContent = g.paused ? "Paused" : watching ? "On" : "Waiting for a connection";
+  $("gState").classList.toggle("off", g.paused || !watching);
+  $("gPause").textContent = g.paused ? "Resume" : "Pause";
+  const hiddenNow = g.log.filter((e) => e.hidden).length;
+  $("gSummary").textContent = g.paused
+    ? "Paused: new comments are not being checked."
+    : `Watching ${watching} of 4 platforms · last check ${ago(g.last_run)} · ${Object.values(g.platforms).reduce((n, i) => n + (i.hidden_total || 0), 0)} hidden so far`;
+  $("gPlatforms").innerHTML = ["youtube", "instagram", "x", "tiktok"].map((p) => {
+    const i = g.platforms[p] || {};
+    const label = { watching: "✅ Watching", error: "⚠️ Problem", not_connected: "Not connected", unsupported: "Not possible" }[i.status] || "Starting…";
+    let msg = "";
+    if (i.status === "watching") msg = `Checks ${every(g.intervals[p])} · last ${ago(i.last_check)} · ${i.hidden_total || 0} hidden`;
+    else if (i.status === "not_connected") msg = connectHtml(p);
+    else if (p === "tiktok") msg = `TikTok has no API for apps to hide comments. Instead, turn on TikTok's own keyword filter (Settings → Privacy → Comments → Filter keywords), which runs 24/7. <button class="linkbtn" id="ttCopy">Copy filter words</button>`;
+    else msg = esc(i.message || "");
+    const out = (p === "youtube" || p === "x") && state.canHide[p]
+      ? ` · <button class="linkbtn" data-logout="${p}">Disconnect</button>` : "";
+    return `<div class="gp"><b>${G_NAMES[p]}</b><span class="st ${i.status}">${label}</span><div class="msg">${msg}${out}</div></div>`;
+  }).join("");
+  $("gPlatforms").querySelectorAll("[data-logout]").forEach((b) => (b.onclick = async () => {
+    await fetch(`/auth/${b.dataset.logout}/logout`, { method: "POST" }); loadStatus();
+  }));
+
+  $("ttCopy").onclick = async () => {
+    const words = g.tiktok_filter_words.join(", ");
+    try { await navigator.clipboard.writeText(words); $("ttCopy").textContent = "Copied ✓"; }
+    catch (e) { $("ttCopy").replaceWith(Object.assign(document.createElement("textarea"), { value: words, rows: 3 })); }
+  };
+  $("gLogTitle").textContent = `Hidden automatically (${hiddenNow})`;
+  $("gLog").innerHTML = g.log.length ? g.log.slice(0, 50).map((e, i) => `
+    <div class="comment">
+      <div class="meta"><span class="tag t-${e.category}">${LABELS[e.category]}</span><span>${esc(e.author)} on ${G_NAMES[e.platform]}</span><span>· ${ago(e.at)}</span>
+        ${e.hidden ? `<button class="linkbtn" data-unhide="${esc(e.id)}">Unhide</button>`
+          : e.error ? `<span style="color:var(--warn)">· couldn't hide: ${esc(e.error)}</span>` : `<span>· unhidden</span>`}</div>
+      <p class="text blur" data-g="${i}" title="Click to reveal">${esc(e.text)}</p>
+    </div>`).join("") : `<p class="hint">Nothing hidden yet. 🎉</p>`;
+  $("gLog").querySelectorAll("p.blur").forEach((p) => (p.onclick = () => p.classList.remove("blur")));
+  $("gLog").querySelectorAll("[data-unhide]").forEach((b) => (b.onclick = async () => {
+    b.disabled = true; b.textContent = "Unhiding…";
+    const res = await fetch("/api/always-on/unhide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: b.dataset.unhide }) });
+    const out = await res.json();
+    if (!res.ok) { b.textContent = out.error; return; }
+    renderAlwaysOn(out);
+  }));
+}
+
+async function loadAlwaysOn() {
+  try { renderAlwaysOn(await (await fetch("/api/always-on")).json()); } catch (e) { /* app restarting */ }
+}
+$("gPause").onclick = async () => {
+  const paused = $("gPause").textContent === "Pause";
+  const res = await fetch("/api/always-on/pause", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paused }) });
+  renderAlwaysOn(await res.json());
+};
+$("gCheck").onclick = async () => {
+  $("gCheck").disabled = true; $("gCheck").textContent = "Checking…";
+  try { renderAlwaysOn(await (await fetch("/api/always-on/check", { method: "POST" })).json()); }
+  finally { $("gCheck").disabled = false; $("gCheck").textContent = "Check now"; }
+};
+setInterval(loadAlwaysOn, 30000);
+
+$("export").onclick = () => {
+  const rows = state.data.comments.filter((c) => c.hidden);
+  const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = ["platform,author,category,reason,date,comment_id,text"]
+    .concat(rows.map((c) => [c.platform, c.author, c.category, c.reason, c.created_at, c.id, c.text].map(q).join(",")))
+    .join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "guardian-evidence.csv"; a.click();
+};
+
+function loadStatus() {
+ return fetch("/api/status").then((r) => r.json()).then((s) => {
+  state.connected = s.connected; state.canHide = s.can_hide; statusInfo = s; renderPlatforms(); loadAlwaysOn();
+  $("engine").textContent = s.ai ? "AI mode: Claude" : "Offline mode (add an Anthropic API key for smarter sorting)";
+ });
+}
+loadStatus();
+renderPlatforms();
+</script>
+</body>
+</html>

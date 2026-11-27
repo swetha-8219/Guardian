@@ -1,0 +1,23 @@
+name: 🎯 Wrongly hidden or missed comment
+description: Guardian hid a kind comment, or missed a hurtful one
+labels: [accuracy]
+body:
+  - type: textarea
+    id: comment
+    attributes:
+      label: The comment
+      description: Paste the comment text (remove names if you prefer).
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong?
+      options: [It was hidden but shouldn't have been, It should have been hidden but wasn't]
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Sorted by
+      options: [Claude AI, Offline word filter, Not sure]

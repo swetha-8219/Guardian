@@ -1,0 +1,7 @@
+# For running from a clone. Simpler: pip install -e ".[dev]"
+flask>=3.0
+requests>=2.31
+anthropic>=2.14
+python-dotenv>=1.0
+mcp>=2.3,<3
+pytest>=8.0

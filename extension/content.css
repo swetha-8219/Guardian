@@ -1,0 +1,6 @@
+.bb-blur { filter: blur(7px) !important; user-select: none !important; pointer-events: none !important; }
+.bb-label {
+  display: inline-block; margin: 2px 0 4px; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid #c9bfff; background: #eee9ff; color: #4b2fd6;
+  font: 600 12px/1.4 system-ui, sans-serif; cursor: pointer;
+}

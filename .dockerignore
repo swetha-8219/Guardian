@@ -1,0 +1,7 @@
+.venv
+.env
+.git
+tests
+extension
+*.csv
+.guardian.json

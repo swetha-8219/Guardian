@@ -1,0 +1,15 @@
+name: 💡 Feature request
+description: An idea to make Guardian more useful for creators
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: For example "I run a Twitch channel and chat gets nasty during streams."
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Guardian to do?

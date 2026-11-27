@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "creator-guardian"
+version = "0.1.0"
+description = "Read the love, skip the hate: a free, open-source comment shield that hides bullying on YouTube, Instagram and X around the clock."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "swetha-8219" }]
+keywords = ["cyberbullying", "content-moderation", "creators", "youtube", "instagram", "tiktok", "mcp", "claude", "mental-health"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Framework :: Flask",
+  "Environment :: Web Environment",
+  "Intended Audience :: End Users/Desktop",
+  "Topic :: Communications",
+]
+dependencies = [
+  "flask>=3.0",
+  "requests>=2.31",
+  "anthropic>=2.14",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=2.3,<3"]
+dev = ["pytest>=8.0", "mcp>=2.3,<3"]
+
+[project.urls]
+Homepage = "https://github.com/swetha-8219/Guardian"
+Issues = "https://github.com/swetha-8219/Guardian/issues"
+
+[project.scripts]
+guardian = "guardian.app:main"
+guardian-always-on = "guardian.cli:always_on_main"
+guardian-weekly-report = "guardian.cli:weekly_report_main"
+guardian-mcp = "guardian.mcp_server:main"
+
+[tool.setuptools]
+packages = ["guardian"]
+
+[tool.setuptools.package-data]
+guardian = ["templates/*.html", "wordlists.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
